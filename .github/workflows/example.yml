@@ -1,0 +1,55 @@
+# Example workflow - Copy this to your repository's .github/workflows/ directory
+# Rename to git-ai.yml or similar
+
+name: Git AI
+
+on:
+  pull_request:
+    types: [closed]
+  schedule:
+    - cron: "0 0 * * *" # Daily at midnight UTC
+  workflow_dispatch:
+
+jobs:
+  pr-tracking:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+
+      - name: Run Git AI
+        uses: acunniffe/git-ai-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-url: ${{ github.event.pull_request.html_url }}
+          merge-commit-sha: ${{ github.event.pull_request.merge_commit_sha }}
+          # Uncomment and configure for OTLP export:
+          # otel-endpoint: ${{ secrets.OTLP_ENDPOINT }}
+          # otel-headers: "Authorization=Bearer ${{ secrets.OTLP_TOKEN }}"
+          # otel-service-name: my-service
+
+  daily-export:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Git AI
+        uses: acunniffe/git-ai-action@v1
+        with:
+          default-branch: ${{ github.event.repository.default_branch }}
+          # Uncomment and configure for OTLP export:
+          # otel-endpoint: ${{ secrets.OTLP_ENDPOINT }}
+          # otel-headers: "Authorization=Bearer ${{ secrets.OTLP_TOKEN }}"
+          # otel-service-name: my-service

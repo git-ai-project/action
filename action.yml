@@ -1,0 +1,102 @@
+name: "Git AI"
+description: "Track AI-assisted development and export OpenTelemetry data for your repository"
+author: "acunniffe"
+branding:
+  icon: "git-branch"
+  color: "purple"
+
+inputs:
+  github-token:
+    description: "GitHub token for API access"
+    required: false
+    default: ${{ github.token }}
+  pr-url:
+    description: "Pull request URL (triggers PR mode when provided)"
+    required: false
+  repo-url:
+    description: "Repository URL"
+    required: false
+    default: ${{ github.server_url }}/${{ github.repository }}
+  merge-commit-sha:
+    description: "Merge commit SHA (required when pr-url is provided)"
+    required: false
+  default-branch:
+    description: "Default branch name (for daily export mode)"
+    required: false
+    default: "main"
+  otel-endpoint:
+    description: "OpenTelemetry endpoint URL"
+    required: false
+  otel-headers:
+    description: "OpenTelemetry headers (key=value format, comma separated)"
+    required: false
+  otel-service-name:
+    description: "OpenTelemetry service name"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Fetch all branches and git notes
+      shell: bash
+      run: |
+        git fetch origin '+refs/heads/*:refs/remotes/origin/*' || true
+        git fetch origin '+refs/notes/ai/*:refs/notes/ai/*' || true
+
+    - name: Install git-ai
+      if: inputs.pr-url != ''
+      shell: bash
+      run: |
+        curl -fsSL https://raw.githubusercontent.com/acunniffe/git-ai/main/install.sh | bash
+        echo "$HOME/.git-ai/bin" >> $GITHUB_PATH
+
+    - name: Install git-ai-otel
+      shell: bash
+      run: |
+        curl -fsSL https://git-ai-otel.s3.us-east-2.amazonaws.com/git-ai-otel-latest.tar.gz -o git-ai-otel.tar.gz
+        tar -xzf git-ai-otel.tar.gz
+        chmod +x git-ai-otel
+        sudo mv git-ai-otel /usr/local/bin/
+
+    - name: Configure git user
+      if: inputs.pr-url != ''
+      shell: bash
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Run git-ai CI
+      if: inputs.pr-url != ''
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        export PATH="$HOME/.git-ai/bin:$PATH"
+        git-ai ci github run
+
+    - name: Export PR OpenTelemetry data
+      if: inputs.pr-url != ''
+      shell: bash
+      env:
+        OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.otel-endpoint }}
+        OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.otel-headers }}
+        OTEL_SERVICE_NAME: ${{ inputs.otel-service-name }}
+      run: |
+        cd git-ai-ci-clone
+        git-ai-otel export-pr "${{ inputs.pr-url }}" "${{ inputs.repo-url }}" merged "${{ inputs.merge-commit-sha }}"
+
+    - name: Export daily OpenTelemetry data
+      if: inputs.pr-url == ''
+      shell: bash
+      env:
+        OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.otel-endpoint }}
+        OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.otel-headers }}
+        OTEL_SERVICE_NAME: ${{ inputs.otel-service-name }}
+      run: |
+        git-ai-otel export "${{ inputs.default-branch }}" "${{ inputs.repo-url }}"
+
+    - name: Write daily report summary
+      if: inputs.pr-url == ''
+      shell: bash
+      run: |
+        echo "# Hello World" >> $GITHUB_STEP_SUMMARY
