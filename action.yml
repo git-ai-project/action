@@ -47,7 +47,7 @@ runs:
       if: inputs.pr-url != ''
       shell: bash
       run: |
-        curl -fsSL https://raw.githubusercontent.com/acunniffe/git-ai/main/install.sh | bash
+        GIT_AI_RELEASE_TAG=v1.0.23-next-2c08a4e curl -fsSL https://raw.githubusercontent.com/acunniffe/git-ai/main/install.sh | bash
         echo "$HOME/.git-ai/bin" >> $GITHUB_PATH
 
     - name: Install git-ai-otel
