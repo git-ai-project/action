@@ -24,13 +24,13 @@ inputs:
     description: "Default branch name (for daily export mode)"
     required: false
     default: "main"
-  otel-endpoint:
+  OTEL_EXPORTER_OTLP_ENDPOINT:
     description: "OpenTelemetry endpoint URL"
     required: false
-  otel-headers:
+  OTEL_EXPORTER_OTLP_HEADERS:
     description: "OpenTelemetry headers (key=value format, comma separated)"
     required: false
-  otel-service-name:
+  OTEL_SERVICE_NAME:
     description: "OpenTelemetry service name"
     required: false
 
@@ -78,9 +78,9 @@ runs:
       if: inputs.pr-url != ''
       shell: bash
       env:
-        OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.otel-endpoint }}
-        OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.otel-headers }}
-        OTEL_SERVICE_NAME: ${{ inputs.otel-service-name }}
+        OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.OTEL_EXPORTER_OTLP_ENDPOINT }}
+        OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
+        OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
       run: |
         cd git-ai-ci-clone
         git-ai-otel export-pr "${{ inputs.pr-url }}" "${{ inputs.repo-url }}" merged "${{ inputs.merge-commit-sha }}"
@@ -89,9 +89,9 @@ runs:
       if: inputs.pr-url == ''
       shell: bash
       env:
-        OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.otel-endpoint }}
-        OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.otel-headers }}
-        OTEL_SERVICE_NAME: ${{ inputs.otel-service-name }}
+        OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.OTEL_EXPORTER_OTLP_ENDPOINT }}
+        OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
+        OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
       run: |
         git-ai-otel export "${{ inputs.default-branch }}" "${{ inputs.repo-url }}"
 
