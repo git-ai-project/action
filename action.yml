@@ -82,7 +82,6 @@ runs:
         OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
         OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
       run: |
-        cd git-ai-ci-clone
         git-ai-otel export-pr "${{ inputs.pr-url }}" "${{ inputs.repo-url }}" merged "${{ inputs.merge-commit-sha }}"
 
     - name: Export daily OpenTelemetry data
