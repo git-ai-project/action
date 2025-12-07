@@ -47,7 +47,7 @@ runs:
       if: inputs.pr-url != ''
       shell: bash
       run: |
-        GIT_AI_RELEASE_TAG=v1.0.23-next-2c08a4e curl -fsSL https://raw.githubusercontent.com/acunniffe/git-ai/main/install.sh | bash
+        curl -fsSL https://raw.githubusercontent.com/acunniffe/git-ai/main/install.sh | bash
         echo "$HOME/.git-ai/bin" >> $GITHUB_PATH
 
     - name: Install git-ai-otel
@@ -92,6 +92,7 @@ runs:
         OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
         OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
       run: |
+        git fetch
         git-ai-otel export "${{ inputs.default-branch }}" "${{ inputs.repo-url }}" --report markdown
 
     - name: Write daily report summary
