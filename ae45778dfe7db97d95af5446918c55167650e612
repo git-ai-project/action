@@ -1,0 +1,44 @@
+.github/workflows/example.yml
+  dbd327a35f01d521 23
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "development:1.0.23",
+  "base_commit_sha": "ae45778dfe7db97d95af5446918c55167650e612",
+  "prompts": {
+    "dbd327a35f01d521": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "bf897eef-135c-4ca2-a783-61959a07df51",
+        "model": "claude-4.5-sonnet-thinking"
+      },
+      "human_author": "Aidan Cunniffe <acunniffe@gmail.com>",
+      "messages": [
+        {
+          "type": "user",
+          "text": "@pr-close/action.yml:1-73 I don't want this action failing to be a red X / failed check.",
+          "timestamp": "2025-12-08T14:50:53.048Z"
+        },
+        {
+          "type": "assistant",
+          "text": "Looking at your PR close action, there are a few ways to prevent it from showing as a failed check in GitHub:\n\n## Option 1: Make the action steps continue on error\n\nYou can add `continue-on-error: true` to individual steps within the composite action. For example, you could modify the last step that runs `git-ai-otel` to not fail the action:\n\n```yaml\n- name: Run git-ai pr CI\n  shell: bash\n  continue-on-error: true  # Add this\n  env:\n    GITHUB_TOKEN: ${{ inputs.github-token }}\n    # ...\n```\n\n## Option 2: Handle errors in the shell script\n\nYou can modify the shell commands to always exit successfully, even if commands fail:\n\n```bash\nrun: |\n  export PATH=\"$HOME/.git-ai/bin:$PATH\"\n  git-ai ci github run --no-cleanup || true\n  cd git-ai-ci-clone || exit 0\n  git fetch origin || true\n  git-ai-otel export-pr \"${{ inputs.pr-url }}\" \"${{ inputs.repo-url }}\" merged \"${{ inputs.merge-commit-sha }}\" || true\n```\n\n## Option 3: Let the caller control it (Recommended)\n\nThe cleanest approach is often to let the workflow that **uses** this action decide whether failures should be fatal. Users of your action would add `continue-on-error: true` in their workflow:\n\n```yaml\n- uses: your-org/action/pr-close@main\n  continue-on-error: true\n  with:\n    pr-url: ${{ github.event.pull_request.html_url }}\n    # ...\n```\n\n**Which approach would you prefer?** Options 1 and 2 make the action itself more forgiving, while Option 3 gives users flexibility to choose whether they want failures to be fatal or not.",
+          "timestamp": "2025-12-08T14:51:10.058Z"
+        },
+        {
+          "type": "user",
+          "text": "continue-on-error: true > to example.yml",
+          "timestamp": "2025-12-08T14:51:44.574Z"
+        },
+        {
+          "type": "assistant",
+          "text": "Done! I've added `continue-on-error: true` to the pr-close step in the example workflow. Now if the pr-close action fails, it won't cause a red X / failed check in GitHub - the workflow will continue and show as successful.\n\n```21:24:.github/workflows/example.yml\n      - name: Run Git AI PR Close\n        uses: git-ai-project/action/pr-close@v1\n        continue-on-error: true\n        with:\n```",
+          "timestamp": "2025-12-08T14:52:10.181Z"
+        }
+      ],
+      "total_additions": 1,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
