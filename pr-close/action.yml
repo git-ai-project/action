@@ -1,8 +1,8 @@
-name: "Git AI Dashboards"
-description: "Track AI-assisted development and export OpenTelemetry data for your repository"
+name: "Git AI PR Close"
+description: "Track AI-assisted development on PR close and export OpenTelemetry data"
 author: "acunniffe"
 branding:
-  icon: "git-branch"
+  icon: "git-pull-request"
   color: "purple"
 
 inputs:
@@ -11,19 +11,15 @@ inputs:
     required: false
     default: ${{ github.token }}
   pr-url:
-    description: "Pull request URL (triggers PR mode when provided)"
-    required: false
+    description: "Pull request URL"
+    required: true
   repo-url:
     description: "Repository URL"
     required: false
     default: ${{ github.server_url }}/${{ github.repository }}
   merge-commit-sha:
-    description: "Merge commit SHA (required when pr-url is provided)"
-    required: false
-  default-branch:
-    description: "Default branch name (for daily export mode)"
-    required: false
-    default: "main"
+    description: "Merge commit SHA"
+    required: true
   OTEL_EXPORTER_OTLP_ENDPOINT:
     description: "OpenTelemetry endpoint URL"
     required: false
@@ -37,31 +33,32 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        path: git-ai-ci-clone
+        fetch-depth: 0
+        ref: ${{ inputs.merge-commit-sha }}
+
     - name: Install git-ai
-      if: inputs.pr-url != ''
       shell: bash
       run: |
         curl -fsSL https://raw.githubusercontent.com/acunniffe/git-ai/main/install.sh | bash
         echo "$HOME/.git-ai/bin" >> $GITHUB_PATH
-
-    - name: Install git-ai-otel
-      shell: bash
-      run: |
         curl -fsSL https://git-ai-otel.s3.us-east-2.amazonaws.com/git-ai-otel-latest.tar.gz -o git-ai-otel.tar.gz
         tar -xzf git-ai-otel.tar.gz
         chmod +x git-ai-otel
         sudo mv git-ai-otel /usr/local/bin/
 
     - name: Configure git user
-      if: inputs.pr-url != ''
       shell: bash
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
     - name: Run git-ai CI
-      if: inputs.pr-url != ''
       shell: bash
+      working-directory: git-ai-ci-clone
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
@@ -69,28 +66,11 @@ runs:
         git-ai ci github run
 
     - name: Export PR OpenTelemetry data
-      if: inputs.pr-url != ''
       shell: bash
+      working-directory: git-ai-ci-clone
       env:
         OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.OTEL_EXPORTER_OTLP_ENDPOINT }}
         OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
         OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
       run: |
         git-ai-otel export-pr "${{ inputs.pr-url }}" "${{ inputs.repo-url }}" merged "${{ inputs.merge-commit-sha }}"
-
-    - name: Export daily OpenTelemetry data
-      if: inputs.pr-url == ''
-      shell: bash
-      env:
-        OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.OTEL_EXPORTER_OTLP_ENDPOINT }}
-        OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
-        OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
-      run: |
-        git fetch
-        git-ai-otel export "${{ inputs.default-branch }}" "${{ inputs.repo-url }}" --report markdown
-
-    - name: Write daily report summary
-      if: inputs.pr-url == ''
-      shell: bash
-      run: |
-        cat report.md >> $GITHUB_STEP_SUMMARY

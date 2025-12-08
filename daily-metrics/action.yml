@@ -1,0 +1,75 @@
+name: "Git AI Daily Metrics"
+description: "Export daily OpenTelemetry metrics for AI-assisted development"
+author: "acunniffe"
+branding:
+  icon: "bar-chart-2"
+  color: "purple"
+
+inputs:
+  repo-url:
+    description: "Repository URL"
+    required: false
+    default: ${{ github.server_url }}/${{ github.repository }}
+  default-branch:
+    description: "Default branch name"
+    required: false
+  OTEL_EXPORTER_OTLP_ENDPOINT:
+    description: "OpenTelemetry endpoint URL"
+    required: false
+  OTEL_EXPORTER_OTLP_HEADERS:
+    description: "OpenTelemetry headers (key=value format, comma separated)"
+    required: false
+  OTEL_SERVICE_NAME:
+    description: "OpenTelemetry service name"
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        path: git-ai-ci-clone
+        fetch-depth: 0
+
+    - name: Detect branch name
+      id: detect-branch
+      shell: bash
+      working-directory: git-ai-ci-clone
+      run: |
+        if [ -n "${{ inputs.default-branch }}" ]; then
+          BRANCH="${{ inputs.default-branch }}"
+        else
+          BRANCH=$(git rev-parse --abbrev-ref HEAD)
+          if [ "$BRANCH" = "HEAD" ]; then
+            # Detached HEAD, try to get the default branch from remote
+            BRANCH=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
+          fi
+        fi
+        echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+        echo "Using branch: $BRANCH"
+
+    - name: Install git-ai-otel
+      shell: bash
+      run: |
+        curl -fsSL https://git-ai-otel.s3.us-east-2.amazonaws.com/git-ai-otel-latest.tar.gz -o git-ai-otel.tar.gz
+        tar -xzf git-ai-otel.tar.gz
+        chmod +x git-ai-otel
+        sudo mv git-ai-otel /usr/local/bin/
+
+    - name: Export daily OpenTelemetry data
+      shell: bash
+      working-directory: git-ai-ci-clone
+      env:
+        OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.OTEL_EXPORTER_OTLP_ENDPOINT }}
+        OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
+        OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
+      run: |
+        git fetch
+        git-ai-otel export "${{ steps.detect-branch.outputs.branch }}" "${{ inputs.repo-url }}" --report markdown
+
+    - name: Write daily report summary
+      shell: bash
+      working-directory: git-ai-ci-clone
+      run: |
+        cat report.md >> $GITHUB_STEP_SUMMARY
