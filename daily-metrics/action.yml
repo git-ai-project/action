@@ -13,6 +13,7 @@ inputs:
   default-branch:
     description: "Default branch name"
     required: false
+    default: ${{ github.event.repository.default_branch }}
   OTEL_EXPORTER_OTLP_ENDPOINT:
     description: "OpenTelemetry endpoint URL"
     required: false
