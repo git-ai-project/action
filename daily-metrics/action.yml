@@ -33,30 +33,16 @@ runs:
         path: git-ai-ci-clone
         fetch-depth: 0
 
-    - name: Detect branch name
-      id: detect-branch
-      shell: bash
-      working-directory: git-ai-ci-clone
-      run: |
-        if [ -n "${{ inputs.default-branch }}" ]; then
-          BRANCH="${{ inputs.default-branch }}"
-        else
-          BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          if [ "$BRANCH" = "HEAD" ]; then
-            # Detached HEAD, try to get the default branch from remote
-            BRANCH=$(git remote show origin | grep 'HEAD branch' | cut -d' ' -f5)
-          fi
-        fi
-        echo "branch=$BRANCH" >> $GITHUB_OUTPUT
-        echo "Using branch: $BRANCH"
-
-    - name: Install git-ai-otel
+    - name: Install git-ai
       shell: bash
       run: |
+        curl -fsSL https://raw.githubusercontent.com/acunniffe/git-ai/main/install.sh | bash
+        echo "$HOME/.git-ai/bin" >> $GITHUB_PATH
         curl -fsSL https://git-ai-otel.s3.us-east-2.amazonaws.com/git-ai-otel-latest.tar.gz -o git-ai-otel.tar.gz
         tar -xzf git-ai-otel.tar.gz
         chmod +x git-ai-otel
         sudo mv git-ai-otel /usr/local/bin/
+    
 
     - name: Export daily OpenTelemetry data
       shell: bash
