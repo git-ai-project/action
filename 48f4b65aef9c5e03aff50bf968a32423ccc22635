@@ -1,0 +1,75 @@
+action.yml
+  7711fcc22205d1cc 1
+.github/workflows/example.yml
+  7711fcc22205d1cc 14,21,28-30,32,39,44-46
+  cb983e6a7ee0c9ba 22,35-36,40
+daily-metrics/action.yml
+  7711fcc22205d1cc 1-31,33,35-75
+pr-close/action.yml
+  7711fcc22205d1cc 1-38,40-76
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "development:1.0.23",
+  "base_commit_sha": "48f4b65aef9c5e03aff50bf968a32423ccc22635",
+  "prompts": {
+    "7711fcc22205d1cc": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "61669926-dc11-421e-9d88-72e383ae8143",
+        "model": "claude-4.5-sonnet-thinking"
+      },
+      "human_author": "Aidan Cunniffe <acunniffe@gmail.com>",
+      "messages": [
+        {
+          "type": "user",
+          "text": "break this back into two seperate jobs. \n\n\n\njob 1 is pr-close\n\njob 2 is daily-metrics",
+          "timestamp": "2025-12-08T13:11:02.116Z"
+        },
+        {
+          "type": "assistant",
+          "text": "I'll read the current action.yml file to understand the structure and split it into two separate jobs.",
+          "timestamp": "2025-12-08T13:11:08.461Z"
+        }
+      ],
+      "total_additions": 176,
+      "total_deletions": 40,
+      "accepted_lines": 159,
+      "overriden_lines": 0
+    },
+    "cb983e6a7ee0c9ba": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "ef166716-de21-4f90-aa62-07a2df17b5fa",
+        "model": "claude-4.5-sonnet-thinking"
+      },
+      "human_author": "Aidan Cunniffe <acunniffe@gmail.com>",
+      "messages": [
+        {
+          "type": "user",
+          "text": "@.github/workflows/example.yml:1-45 is the example up to date with the behaviors of the @daily-metrics and @pr-close \n\n\n\nbtw this repo is git-ai-project/action",
+          "timestamp": "2025-12-08T13:28:01.987Z"
+        },
+        {
+          "type": "assistant",
+          "text": "I'll check if the example workflow is up to date with the actual action definitions in both subdirectories.",
+          "timestamp": "2025-12-08T13:28:08.174Z"
+        },
+        {
+          "type": "assistant",
+          "text": "Looking at the action definitions, I can see a few issues with the example workflow:\n\n## Issues Found:\n\n1. **Repository reference is incorrect**: The example uses `acunniffe/git-ai-action` but you mentioned this repo is `git-ai-project/action`. Lines 22 and 38 should be updated.\n\n2. **Missing `repo-url` input** (minor): Both actions have a `repo-url` input with a default value, but it's not explicitly passed in the example. While this works due to the defaults, it might be clearer to include it.\n\n3. **Missing permissions for daily-metrics**: The `daily-metrics` job doesn't have explicit permissions. While it doesn't write to the repo, it's good practice to add `contents: read` permission.\n\nLet me update the example workflow to fix these issues:",
+          "timestamp": "2025-12-08T13:28:19.078Z"
+        },
+        {
+          "type": "assistant",
+          "text": "Perfect! I've updated the example workflow. Here's what was fixed:\n\n## Changes Made:\n\n1. ✅ **Updated repository references**: Changed from `acunniffe/git-ai-action` to `git-ai-project/action` on both action references (lines 22 and 38)\n\n2. ✅ **Added permissions to daily-metrics job**: Added `contents: read` permission for better security practices\n\n## Summary:\n\nThe example workflow is now **up to date** with both action definitions:\n\n- **pr-close**: All required inputs (`github-token`, `pr-url`, `merge-commit-sha`) are provided correctly, with optional OTEL configuration commented out\n- **daily-metrics**: The `default-branch` input is provided correctly, with optional OTEL configuration commented out\n\nBoth actions have optional `repo-url` inputs, but since they have sensible defaults (`${{ github.server_url }}/${{ github.repository }}`), they don't need to be explicitly set in the example.",
+          "timestamp": "2025-12-08T13:28:35.731Z"
+        }
+      ],
+      "total_additions": 4,
+      "total_deletions": 2,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    }
+  }
+}
