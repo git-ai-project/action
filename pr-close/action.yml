@@ -43,7 +43,7 @@ runs:
     - name: Install git-ai
       shell: bash
       run: |
-        curl -fsSL https://raw.githubusercontent.com/acunniffe/git-ai/main/install.sh | bash
+        GIT_AI_RELEASE_TAG="v1.0.23-next-96e7686" curl -fsSL https://raw.githubusercontent.com/acunniffe/git-ai/main/install.sh | bash
         echo "$HOME/.git-ai/bin" >> $GITHUB_PATH
         curl -fsSL https://git-ai-otel.s3.us-east-2.amazonaws.com/git-ai-otel-latest.tar.gz -o git-ai-otel.tar.gz
         tar -xzf git-ai-otel.tar.gz
