@@ -52,8 +52,8 @@ runs:
         OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
         OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
       run: |
-        git fetch
-        git-ai-otel export "${{ steps.detect-branch.outputs.branch }}" "${{ inputs.repo-url }}" --report markdown
+        git fetch origin
+        git-ai-otel export "${{ inputs.default-branch }}" "${{ inputs.repo-url }}" --report markdown
 
     - name: Write daily report summary
       shell: bash
