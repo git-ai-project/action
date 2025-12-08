@@ -33,12 +33,12 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        path: git-ai-ci-clone
-        fetch-depth: 0
-        ref: ${{ inputs.merge-commit-sha }}
+    # - name: Checkout repository
+    #   uses: actions/checkout@v4
+    #   with:
+    #     path: git-ai-ci-clone
+    #     fetch-depth: 0
+    #     ref: ${{ inputs.merge-commit-sha }}
 
     - name: Install git-ai
       shell: bash
@@ -58,7 +58,6 @@ runs:
 
     - name: Run git-ai CI
       shell: bash
-      working-directory: git-ai-ci-clone
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
       run: |
@@ -73,4 +72,5 @@ runs:
         OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
         OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
       run: |
+        git fetch origin
         git-ai-otel export-pr "${{ inputs.pr-url }}" "${{ inputs.repo-url }}" merged "${{ inputs.merge-commit-sha }}"
