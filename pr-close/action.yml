@@ -10,6 +10,10 @@ inputs:
     description: "Version of git-ai to install (e.g., 'v1.0.23'). Defaults to latest release."
     required: false
     default: "latest"
+  git-ai-repo:
+    description: "GitHub repo to download git-ai from (owner/repo format)."
+    required: false
+    default: "acunniffe/git-ai"
   github-token:
     description: "GitHub token for API access"
     required: false
@@ -48,11 +52,12 @@ runs:
       shell: bash
       run: |
         VERSION="${{ inputs.git-ai-version }}"
+        REPO="${{ inputs.git-ai-repo }}"
         if [ "$VERSION" = "latest" ]; then
-          VERSION=$(curl -fsSL https://api.github.com/repos/acunniffe/git-ai/releases/latest | jq -r '.tag_name')
+          VERSION=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" | jq -r '.tag_name')
         fi
 
-        INSTALL_URL="https://github.com/acunniffe/git-ai/releases/download/${VERSION}/install.sh"
+        INSTALL_URL="https://github.com/${REPO}/releases/download/${VERSION}/install.sh"
         HTTP_STATUS=$(curl -fsSL -w "%{http_code}" -o /tmp/install.sh "$INSTALL_URL" 2>/dev/null || echo "000")
 
         if [ "$HTTP_STATUS" != "200" ]; then
