@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release (e.g., v1.0.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          body: |
+            ## Usage
+
+            ```yaml
+            # For PR close tracking
+            - uses: acunniffe/git-ai-action/pr-close@${{ steps.version.outputs.version }}
+              with:
+                git-ai-version: "v1.0.23"  # Pin to a specific git-ai version
+                github-token: ${{ secrets.GITHUB_TOKEN }}
+                pr-url: ${{ github.event.pull_request.html_url }}
+                merge-commit-sha: ${{ github.event.pull_request.merge_commit_sha }}
+
+            # For daily metrics
+            - uses: acunniffe/git-ai-action/daily-metrics@${{ steps.version.outputs.version }}
+              with:
+                git-ai-version: "v1.0.23"  # Pin to a specific git-ai version
+                default-branch: ${{ github.event.repository.default_branch }}
+            ```

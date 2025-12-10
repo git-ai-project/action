@@ -1,5 +1,9 @@
 # Example workflow - Copy this to your repository's .github/workflows/ directory
 # Rename to git-ai.yml or similar
+#
+# Version Pinning (recommended for security):
+#   Action version: use @v1.0.0 (see https://github.com/acunniffe/git-ai-action/releases)
+#   git-ai version: use git-ai-version input (see https://github.com/acunniffe/git-ai/releases)
 
 name: Git AI
 
@@ -19,9 +23,10 @@ jobs:
 
     steps:
       - name: Run Git AI PR Close
-        uses: git-ai-project/action/pr-close@v1
+        uses: acunniffe/git-ai-action/pr-close@v1.0.0
         continue-on-error: true
         with:
+          git-ai-version: "v1.0.23" # Pin to a specific version for reproducibility
           github-token: ${{ secrets.GITHUB_TOKEN }}
           pr-url: ${{ github.event.pull_request.html_url }}
           merge-commit-sha: ${{ github.event.pull_request.merge_commit_sha }}
@@ -38,8 +43,9 @@ jobs:
 
     steps:
       - name: Run Git AI Daily Metrics
-        uses: git-ai-project/action/daily-metrics@v1
+        uses: acunniffe/git-ai-action/daily-metrics@v1.0.0
         with:
+          git-ai-version: "v1.0.23" # Pin to a specific version for reproducibility
           default-branch: ${{ github.event.repository.default_branch }}
           # Uncomment and configure for OTLP export:
           # OTEL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.OTLP_ENDPOINT }}

@@ -6,6 +6,10 @@ branding:
   color: "purple"
 
 inputs:
+  git-ai-version:
+    description: "Version of git-ai to install (e.g., 'v1.0.23'). Defaults to latest release."
+    required: false
+    default: "latest"
   github-token:
     description: "GitHub token for API access"
     required: false
@@ -41,7 +45,21 @@ runs:
       if: inputs.pr-url != ''
       shell: bash
       run: |
-        curl -fsSL https://raw.githubusercontent.com/acunniffe/git-ai/main/install.sh | bash
+        VERSION="${{ inputs.git-ai-version }}"
+        if [ "$VERSION" = "latest" ]; then
+          VERSION=$(curl -fsSL https://api.github.com/repos/acunniffe/git-ai/releases/latest | jq -r '.tag_name')
+        fi
+
+        INSTALL_URL="https://github.com/acunniffe/git-ai/releases/download/${VERSION}/install.sh"
+        HTTP_STATUS=$(curl -fsSL -w "%{http_code}" -o /tmp/install.sh "$INSTALL_URL" 2>/dev/null || echo "000")
+
+        if [ "$HTTP_STATUS" != "200" ]; then
+          echo "Error: Failed to download install.sh for version ${VERSION}"
+          exit 1
+        fi
+
+        bash /tmp/install.sh
+        rm /tmp/install.sh
         echo "$HOME/.git-ai/bin" >> $GITHUB_PATH
 
     - name: Install git-ai-otel
