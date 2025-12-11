@@ -24,7 +24,7 @@ jobs:
       contents: write
     steps:
       - name: Run Git AI PR Close
-        uses: git-ai-project/action/pr-close@main
+        uses: git-ai-project/action/pr-close@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           pr-url: ${{ github.event.pull_request.html_url }}
@@ -41,7 +41,7 @@ jobs:
       contents: read
     steps:
       - name: Run Git AI Daily Metrics
-        uses: git-ai-project/action/daily-metrics@main
+        uses: git-ai-project/action/daily-metrics@v1
         with:
           OTEL_EXPORTER_OTLP_ENDPOINT: ${{ secrets.OTEL_EXPORTER_OTLP_ENDPOINT }}
           OTEL_EXPORTER_OTLP_HEADERS: ${{ secrets.OTEL_EXPORTER_OTLP_HEADERS }}
