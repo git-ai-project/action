@@ -26,7 +26,6 @@ jobs:
         uses: git-ai-project/action/pr-close@v1.0.0
         continue-on-error: true
         with:
-          git-ai-version: "v1.0.23" # Pin to a specific version for reproducibility
           github-token: ${{ secrets.GITHUB_TOKEN }}
           pr-url: ${{ github.event.pull_request.html_url }}
           merge-commit-sha: ${{ github.event.pull_request.merge_commit_sha }}
