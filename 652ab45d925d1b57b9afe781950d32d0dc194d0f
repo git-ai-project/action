@@ -1,0 +1,39 @@
+pr-diff-viewer/action.yml
+  d63e01601bab2e42 81-82,89-110
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "development:1.0.25",
+  "base_commit_sha": "652ab45d925d1b57b9afe781950d32d0dc194d0f",
+  "prompts": {
+    "d63e01601bab2e42": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "5889b879-33f1-44d1-8a04-2d9e6728b285",
+        "model": "claude-4.5-opus-high-thinking"
+      },
+      "human_author": "Aidan Cunniffe <acunniffe@gmail.com>",
+      "messages": [
+        {
+          "type": "user",
+          "text": "@pr-diff-viewer/action.yml:1-89 ok last thing missing here. Save the result of upload-ai-diff (it's a URL)\n\nThen we want to find the PR message (first comment of person who opened the PR), And edit it by adding this to the bottom if it's not there already. The link never has to be updated once it's been created. \n\n<!-- git-ai-project/actions -->\n---\n\"[See which lines were written by AI]($link). Powered by [Git AI](https://github.com/acunniffe/git-ai)\"\n<!-- it-ai-project/actions -->\n\nIdeally this is possible with bin tools or a shell script so we don't need to write any customer code",
+          "timestamp": "2025-12-13T17:24:17.192Z"
+        },
+        {
+          "type": "assistant",
+          "text": "I'll update the action to capture the URL from `upload-ai-diff` and then use `gh` CLI to update the PR description if the marker isn't already present.",
+          "timestamp": "2025-12-13T17:24:31.407Z"
+        },
+        {
+          "type": "assistant",
+          "text": "Done! The action now:\n\n1. **Captures the URL** from `git-ai-otel upload-ai-diff` into `$DIFF_URL`\n2. **Fetches the current PR body** using `gh pr view`\n3. **Checks if the marker already exists** with grep on `<!-- git-ai-project/actions -->`\n4. **If not present**, appends the block and updates the PR with `gh pr edit`\n5. **If already there**, skips the update (idempotent)\n\nAll done with `gh` CLI and standard shell commands — no custom code needed. The `GH_TOKEN` is already configured so `gh` has the necessary permissions to edit the PR description.\n\nOne note: I used `<!-- git-ai-project/actions -->` for both the opening and closing markers (your example had a typo with `it-ai-project` in the closing tag).",
+          "timestamp": "2025-12-13T17:24:47.841Z"
+        }
+      ],
+      "total_additions": 24,
+      "total_deletions": 2,
+      "accepted_lines": 24,
+      "overriden_lines": 0
+    }
+  }
+}
