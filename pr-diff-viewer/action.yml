@@ -78,11 +78,33 @@ runs:
         echo "Base SHA: ${BASE_SHA}"
         echo "Head SHA: ${HEAD_SHA}"
 
-        git-ai-otel upload-ai-diff \
+        # Run upload-ai-diff and capture the URL
+        DIFF_URL=$(git-ai-otel upload-ai-diff \
           "$BASE_SHA" \
           "$HEAD_SHA" \
           "$OWNER" \
           "$REPO" \
           "$PR_NUMBER" \
           "$PR_URL" \
-          "$PR_METADATA"
+          "$PR_METADATA")
+
+        echo "AI Diff URL: ${DIFF_URL}"
+
+        # Get current PR body
+        PR_BODY=$(gh pr view "$PR_NUMBER" --json body -q '.body')
+
+        # Check if the marker already exists
+        if ! echo "$PR_BODY" | grep -q "<!-- git-ai-project/actions -->"; then
+          # Append the AI diff link block to PR description
+          NEW_BODY="${PR_BODY}
+
+<!-- git-ai-project/actions -->
+---
+[See which lines were written by AI](${DIFF_URL}). Powered by [Git AI](https://github.com/acunniffe/git-ai)
+<!-- git-ai-project/actions -->"
+
+          gh pr edit "$PR_NUMBER" --body "$NEW_BODY"
+          echo "Updated PR description with AI diff link"
+        else
+          echo "PR description already contains AI diff link, skipping update"
+        fi
