@@ -1,0 +1,84 @@
+pr-diff-viewer/action.yml
+  5d3c8324fca2ee06 3-4,7-8,11,15,19,30-33,36,39,41-42,48,51,65,67,69,74,76
+  91632fb2bf905637 1-2,5,17-18,20,66,70,77-98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "development:1.0.25",
+  "base_commit_sha": "8614264ba1738c0a92397cdf006437a39854c32a",
+  "prompts": {
+    "5d3c8324fca2ee06": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "4bc3c9f7-dedf-4955-a9bc-25499d9255d7",
+        "model": "claude-4.5-sonnet-thinking"
+      },
+      "human_author": "Aidan Cunniffe <acunniffe@gmail.com>",
+      "messages": [
+        {
+          "type": "user",
+          "text": "Let's add a new experimental JOB called pr-diff-viewer . Don't document but add the folder\n\nDriver AI use your tool to read the docs in git-ai-bot repo, that's what it should call @pr-diff-viewer/action.yml:1-87",
+          "timestamp": "2025-12-13T17:02:25.031Z"
+        },
+        {
+          "type": "assistant",
+          "text": "I'll help you create a new experimental job called `pr-diff-viewer` that uses Driver AI to read docs from the `git-ai-bot` repo. Let me first check what codebases are available in Driver and examine the existing action structure.",
+          "timestamp": "2025-12-13T17:02:31.952Z"
+        },
+        {
+          "type": "assistant",
+          "text": "Now let me check the git-ai-bot repo documentation to understand what this action should do:",
+          "timestamp": "2025-12-13T17:02:38.130Z"
+        },
+        {
+          "type": "assistant",
+          "text": "Perfect! Now I'll create the new experimental `pr-diff-viewer` action that integrates with Driver AI to read docs from the `git-ai-bot` repo. Based on the architecture, this action will interact with the PR review endpoints.",
+          "timestamp": "2025-12-13T17:02:46.954Z"
+        },
+        {
+          "type": "assistant",
+          "text": "Perfect! I've created the new experimental `pr-diff-viewer` action. Let me verify the structure:",
+          "timestamp": "2025-12-13T17:03:15.672Z"
+        },
+        {
+          "type": "assistant",
+          "text": "Excellent! I've successfully created the new experimental `pr-diff-viewer` action. Here's what was created:\n\n## New Folder Structure\n\n```\n/Users/aidancunniffe/Desktop/action/pr-diff-viewer/\n└── action.yml\n```\n\n## Key Features of the Action\n\nThe `pr-diff-viewer` action integrates with **Driver AI** and the **git-ai-bot** repo documentation:\n\n1. **Fetches PR Data**: Gets PR details and diffs from GitHub API\n2. **Driver AI Integration**: Queries the git-ai-bot codebase documentation to understand:\n   - PR review data storage and retrieval patterns\n   - PR review API endpoints structure\n   - Data schemas and types for PR reviews\n   \n3. **Diff Analysis**: Analyzes the PR diff and provides statistics:\n   - Files changed\n   - Lines added/removed\n   - List of modified files\n\n4. **Git AI Bot API Integration**: Attempts to retrieve PR review data from the git-ai-bot API using the documented tRPC endpoints\n\n5. **Documentation Query**: References these key files from git-ai-bot:\n   - `web/app/api/pr-review/route.ts` (REST API)\n   - `web/lib/trpc/routers/prReview.ts` (tRPC router)\n   - `web/lib/types.ts` (data schemas)\n   - Database schema for pr_review table\n\nThe action is marked as **experimental** and includes visual indicators in the job summary showing it uses Driver AI for documentation understanding. As requested, I did not update the README documentation.",
+          "timestamp": "2025-12-13T17:03:23.549Z"
+        }
+      ],
+      "total_additions": 150,
+      "total_deletions": 0,
+      "accepted_lines": 22,
+      "overriden_lines": 22
+    },
+    "91632fb2bf905637": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "c8e24db4-93a9-4eac-b0af-7c7d7eac428e",
+        "model": "claude-4.5-opus-high-thinking"
+      },
+      "human_author": "Aidan Cunniffe <acunniffe@gmail.com>",
+      "messages": [
+        {
+          "type": "user",
+          "text": "@pr-diff-viewer/action.yml:1-87  Copied this from the other action. \n\nIt's called Git AI PR Viewer \nIt runs on PR synronize \n\nInstead of running the export command do this one instead \n\nUsage: git-ai-otel upload-ai-diff [OPTIONS] <BASE_SHA> <HEAD_SHA> <OWNER> <REPO> <PR_NUMBER> <URL> [PR_METADATA]\n\nArguments:\n  <BASE_SHA>     \n  <HEAD_SHA>     \n  <OWNER>        \n  <REPO>         \n  <PR_NUMBER>    \n  <URL>          \n  [PR_METADATA]  \n\nOptions:\n      --dry-run  \n  -h, --help     Print help\n\nYou'll probably need to use `gh` cli and `jq` to get the metadata needed. GO GO GO",
+          "timestamp": "2025-12-13T17:08:02.412Z"
+        },
+        {
+          "type": "assistant",
+          "text": "I'll update the `pr-diff-viewer/action.yml` to be a proper PR viewer action that runs `upload-ai-diff` with the right metadata from the PR context.",
+          "timestamp": "2025-12-13T17:08:12.064Z"
+        },
+        {
+          "type": "assistant",
+          "text": "Done! I've updated the action with the following changes:\n\n**Key changes:**\n1. **Name/Description** → \"Git AI PR Viewer\" with updated description and icon (`git-pull-request`)\n\n2. **Inputs** → Removed `repo-url` and `default-branch`, added `github-token` for `gh` CLI access\n\n3. **Main step** → Replaced the export command with `upload-ai-diff` that:\n   - Extracts PR context from GitHub event variables (`github.event.pull_request.*`)\n   - Uses `gh pr view` to fetch rich PR metadata (title, author, labels, dates, branch names, stats)\n   - Passes all arguments to `git-ai-otel upload-ai-diff`\n\n4. **Removed** → The daily report summary step (not applicable for PR uploads)\n\nThe action expects to run on PR events like:\n\n```yaml\non:\n  pull_request:\n    types: [opened, synchronize]\n```",
+          "timestamp": "2025-12-13T17:08:48.114Z"
+        }
+      ],
+      "total_additions": 30,
+      "total_deletions": 18,
+      "accepted_lines": 30,
+      "overriden_lines": 0
+    }
+  }
+}
