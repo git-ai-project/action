@@ -95,13 +95,9 @@ runs:
 
         # Check if the marker already exists
         if ! echo "$PR_BODY" | grep -q "<!-- git-ai-project/actions -->"; then
-          # Append the AI diff link block to PR description
-          NEW_BODY="${PR_BODY}
-
-<!-- git-ai-project/actions -->
----
-[See which lines were written by AI](${DIFF_URL}). Powered by [Git AI](https://github.com/acunniffe/git-ai)
-<!-- git-ai-project/actions -->"
+          # Build the footer block
+          FOOTER=$(printf '\n\n<!-- git-ai-project/actions -->\n---\n[See which lines were written by AI](%s). Powered by [Git AI](https://github.com/acunniffe/git-ai)\n<!-- git-ai-project/actions -->' "$DIFF_URL")
+          NEW_BODY="${PR_BODY}${FOOTER}"
 
           gh pr edit "$PR_NUMBER" --body "$NEW_BODY"
           echo "Updated PR description with AI diff link"
