@@ -1,8 +1,8 @@
-name: "Git AI Dashboards"
-description: "Track AI-assisted development and export OpenTelemetry data for your repository"
+name: "Git AI PR Viewer"
+description: "Upload AI-assisted diff data for pull requests"
 author: "acunniffe"
 branding:
-  icon: "git-branch"
+  icon: "git-pull-request"
   color: "purple"
 
 inputs:
@@ -18,20 +18,6 @@ inputs:
     description: "GitHub token for API access"
     required: false
     default: ${{ github.token }}
-  pr-url:
-    description: "Pull request URL (triggers PR mode when provided)"
-    required: false
-  repo-url:
-    description: "Repository URL"
-    required: false
-    default: ${{ github.server_url }}/${{ github.repository }}
-  merge-commit-sha:
-    description: "Merge commit SHA (required when pr-url is provided)"
-    required: false
-  default-branch:
-    description: "Default branch name (for daily export mode)"
-    required: false
-    default: "main"
   OTEL_EXPORTER_OTLP_ENDPOINT:
     description: "OpenTelemetry endpoint URL"
     required: false
@@ -45,8 +31,13 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        path: git-ai-ci-clone
+        fetch-depth: 0
+
     - name: Install git-ai
-      if: inputs.pr-url != ''
       shell: bash
       run: |
         VERSION="${{ inputs.git-ai-version }}"
@@ -67,53 +58,41 @@ runs:
         rm /tmp/install.sh
         echo "$HOME/.git-ai/bin" >> $GITHUB_PATH
 
-    - name: Install git-ai-otel
-      shell: bash
-      run: |
         curl -fsSL https://git-ai-otel.s3.us-east-2.amazonaws.com/git-ai-otel-latest.tar.gz -o git-ai-otel.tar.gz
         tar -xzf git-ai-otel.tar.gz
         chmod +x git-ai-otel
         sudo mv git-ai-otel /usr/local/bin/
 
-    - name: Configure git user
-      if: inputs.pr-url != ''
+    - name: Upload AI diff for PR
       shell: bash
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-    - name: Run git-ai CI
-      if: inputs.pr-url != ''
-      shell: bash
+      working-directory: git-ai-ci-clone
       env:
-        GITHUB_TOKEN: ${{ inputs.github-token }}
-      run: |
-        export PATH="$HOME/.git-ai/bin:$PATH"
-        git-ai ci github run
-
-    - name: Export PR OpenTelemetry data
-      if: inputs.pr-url != ''
-      shell: bash
-      env:
+        GH_TOKEN: ${{ inputs.github-token }}
         OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.OTEL_EXPORTER_OTLP_ENDPOINT }}
         OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
         OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
       run: |
-        git-ai-otel export-pr "${{ inputs.pr-url }}" "${{ inputs.repo-url }}" merged "${{ inputs.merge-commit-sha }}"
+        git fetch origin
 
-    - name: Export daily OpenTelemetry data
-      if: inputs.pr-url == ''
-      shell: bash
-      env:
-        OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.OTEL_EXPORTER_OTLP_ENDPOINT }}
-        OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
-        OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
-      run: |
-        git fetch
-        git-ai-otel export "${{ inputs.default-branch }}" "${{ inputs.repo-url }}" --report markdown
+        BASE_SHA="${{ github.event.pull_request.base.sha }}"
+        HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+        OWNER="${{ github.repository_owner }}"
+        REPO="${{ github.event.repository.name }}"
+        PR_NUMBER="${{ github.event.pull_request.number }}"
+        PR_URL="${{ github.event.pull_request.html_url }}"
 
-    - name: Write daily report summary
-      if: inputs.pr-url == ''
-      shell: bash
-      run: |
-        cat report.md >> $GITHUB_STEP_SUMMARY
+        # Fetch PR metadata using gh cli
+        PR_METADATA=$(gh pr view "$PR_NUMBER" --json title,author,labels,createdAt,updatedAt,baseRefName,headRefName,additions,deletions,changedFiles)
+
+        echo "Uploading AI diff for PR #${PR_NUMBER}"
+        echo "Base SHA: ${BASE_SHA}"
+        echo "Head SHA: ${HEAD_SHA}"
+
+        git-ai-otel upload-ai-diff \
+          "$BASE_SHA" \
+          "$HEAD_SHA" \
+          "$OWNER" \
+          "$REPO" \
+          "$PR_NUMBER" \
+          "$PR_URL" \
+          "$PR_METADATA"
