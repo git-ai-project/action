@@ -1,5 +1,5 @@
 name: "Git AI PR Viewer"
-description: "Upload AI-assisted diff data for pull requests"
+description: "Upload AI-assisted diff data for pull requests. Requires 'pull-requests: write' permission to update PR description."
 author: "acunniffe"
 branding:
   icon: "git-pull-request"
@@ -96,7 +96,7 @@ runs:
         # Check if the marker already exists
         if ! echo "$PR_BODY" | grep -q "<!-- git-ai-project/actions -->"; then
           # Build the footer block
-          FOOTER=$(printf '\n\n<!-- git-ai-project/actions -->\n---\n[See which lines were written by AI](%s). Powered by [Git AI](https://github.com/acunniffe/git-ai)\n<!-- git-ai-project/actions -->' "$DIFF_URL")
+          FOOTER=$(printf '\n\n<!-- git-ai-project/actions -->\n[See which lines were written by AI](%s). Powered by [Git AI](https://github.com/acunniffe/git-ai)\n<!-- git-ai-project/actions -->' "$DIFF_URL")
           NEW_BODY="${PR_BODY}${FOOTER}"
 
           gh pr edit "$PR_NUMBER" --body "$NEW_BODY"
