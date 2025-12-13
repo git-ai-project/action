@@ -18,15 +18,7 @@ inputs:
     description: "GitHub token for API access"
     required: false
     default: ${{ github.token }}
-  OTEL_EXPORTER_OTLP_ENDPOINT:
-    description: "OpenTelemetry endpoint URL"
-    required: false
-  OTEL_EXPORTER_OTLP_HEADERS:
-    description: "OpenTelemetry headers (key=value format, comma separated)"
-    required: false
-  OTEL_SERVICE_NAME:
-    description: "OpenTelemetry service name"
-    required: false
+ 
 
 runs:
   using: "composite"
@@ -68,9 +60,7 @@ runs:
       working-directory: git-ai-ci-clone
       env:
         GH_TOKEN: ${{ inputs.github-token }}
-        OTEL_EXPORTER_OTLP_ENDPOINT: ${{ inputs.OTEL_EXPORTER_OTLP_ENDPOINT }}
-        OTEL_EXPORTER_OTLP_HEADERS: ${{ inputs.OTEL_EXPORTER_OTLP_HEADERS }}
-        OTEL_SERVICE_NAME: ${{ inputs.OTEL_SERVICE_NAME }}
+       
       run: |
         git fetch origin
 
