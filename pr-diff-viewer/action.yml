@@ -18,7 +18,10 @@ inputs:
     description: "GitHub token for API access"
     required: false
     default: ${{ github.token }}
- 
+  repo-url:
+    description: "Repository URL"
+    required: false
+    default: ${{ github.server_url }}/${{ github.repository }}
 
 runs:
   using: "composite"
@@ -66,10 +69,8 @@ runs:
 
         BASE_SHA="${{ github.event.pull_request.base.sha }}"
         HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-        OWNER="${{ github.repository_owner }}"
-        REPO="${{ github.event.repository.name }}"
+        REPOSITORY_LINK="${{ inputs.repo-url }}"
         PR_NUMBER="${{ github.event.pull_request.number }}"
-        PR_URL="${{ github.event.pull_request.html_url }}"
 
         # Fetch PR metadata using gh cli
         PR_METADATA=$(gh pr view "$PR_NUMBER" --json title,author,labels,createdAt,updatedAt,baseRefName,headRefName,additions,deletions,changedFiles)
@@ -82,10 +83,8 @@ runs:
         DIFF_URL=$(git-ai-otel upload-ai-diff \
           "$BASE_SHA" \
           "$HEAD_SHA" \
-          "$OWNER" \
-          "$REPO" \
+          "$REPOSITORY_LINK" \
           "$PR_NUMBER" \
-          "$PR_URL" \
           "$PR_METADATA")
 
         echo "AI Diff URL: ${DIFF_URL}"
