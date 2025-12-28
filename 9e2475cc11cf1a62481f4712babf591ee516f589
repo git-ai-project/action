@@ -1,0 +1,23 @@
+pr-diff-viewer/action.yml
+  abf1d1cb7e2855f0 21-24,72,86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "development:1.0.26",
+  "base_commit_sha": "9e2475cc11cf1a62481f4712babf591ee516f589",
+  "prompts": {
+    "abf1d1cb7e2855f0": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "f650ca0f-babd-4d11-b1fa-7854fec0f8e6",
+        "model": "composer-1"
+      },
+      "human_author": "Sasha Varlamov <sasha@sashavarlamov.com>",
+      "messages": [],
+      "total_additions": 7,
+      "total_deletions": 8,
+      "accepted_lines": 6,
+      "overriden_lines": 0
+    }
+  }
+}
