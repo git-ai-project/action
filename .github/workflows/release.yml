@@ -48,7 +48,7 @@ jobs:
 
             ```yaml
             # For PR close tracking
-            - uses: acunniffe/git-ai-action/pr-close@${{ steps.version.outputs.version }}
+            - uses: git-ai-project/git-ai-action/pr-close@${{ steps.version.outputs.version }}
               with:
                 git-ai-version: "v1.0.23"  # Pin to a specific git-ai version
                 github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -56,7 +56,7 @@ jobs:
                 merge-commit-sha: ${{ github.event.pull_request.merge_commit_sha }}
 
             # For daily metrics
-            - uses: acunniffe/git-ai-action/daily-metrics@${{ steps.version.outputs.version }}
+            - uses: git-ai-project/git-ai-action/daily-metrics@${{ steps.version.outputs.version }}
               with:
                 git-ai-version: "v1.0.23"  # Pin to a specific git-ai version
                 default-branch: ${{ github.event.repository.default_branch }}
