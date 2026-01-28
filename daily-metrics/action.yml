@@ -1,6 +1,6 @@
 name: "Git AI Daily Metrics"
 description: "Export daily OpenTelemetry metrics for AI-assisted development"
-author: "acunniffe"
+author: "git-ai-project"
 branding:
   icon: "bar-chart-2"
   color: "purple"
@@ -13,7 +13,7 @@ inputs:
   git-ai-repo:
     description: "GitHub repo to download git-ai from (owner/repo format)."
     required: false
-    default: "acunniffe/git-ai"
+    default: "git-ai-project/git-ai"
   repo-url:
     description: "Repository URL"
     required: false

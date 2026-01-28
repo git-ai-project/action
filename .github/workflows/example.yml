@@ -3,7 +3,7 @@
 #
 # Version Pinning (recommended for security):
 #   Action version: use @v1.0.0 (see https://github.com/git-ai-project/action/releases)
-#   git-ai version: use git-ai-version input (see https://github.com/acunniffe/git-ai/releases)
+#   git-ai version: use git-ai-version input (see https://github.com/git-ai-project/git-ai/releases)
 
 name: git-ai
 

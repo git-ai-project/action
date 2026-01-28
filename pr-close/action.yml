@@ -1,6 +1,6 @@
 name: "Git AI PR Close"
 description: "Track AI-assisted development on PR close and export OpenTelemetry data"
-author: "acunniffe"
+author: "git-ai-project"
 branding:
   icon: "git-pull-request"
   color: "purple"
@@ -13,7 +13,7 @@ inputs:
   git-ai-repo:
     description: "GitHub repo to download git-ai from (owner/repo format)."
     required: false
-    default: "acunniffe/git-ai"
+    default: "git-ai-project/git-ai"
   github-token:
     description: "GitHub token for API access"
     required: false
